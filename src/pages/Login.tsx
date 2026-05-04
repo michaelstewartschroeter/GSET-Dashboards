@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import bagTractorLogo from '../../BagTractor.svg';
+
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -26,7 +26,7 @@ const Login: React.FC = () => {
       <div className="max-w-md w-full">
         <div className="text-center mb-2">
           <div className="inline-flex items-center justify-center -mb-4">
-            <img src={bagTractorLogo} alt="Bag Tractor" className="w-80 h-80" />
+            <img src="/favicon.svg" alt="Bag Tractor" className="w-64 h-64" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">
             GSE Real-Time Dashboards
