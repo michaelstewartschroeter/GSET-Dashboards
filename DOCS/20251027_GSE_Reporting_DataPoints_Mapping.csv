@@ -1,0 +1,157 @@
+﻿Event/Report,Required Data Points,What's potentially an issue/challenge,From Notes/vendor:
+"1.1 – Safety events by User (by station, ranked)","• Station code/name
+• Employee ID (and display name)
+• Event type (Harsh Acceleration, Harsh Brake, Harsh Turn, Overspeed, Shock/Impact, Seatbelt)
+• Event timestamp (event start; optional end/duration)
+• Asset ID and Asset Type
+• GPS location (lat/long) at event time
+• Event severity metrics (e.g., g‑force, delta‑V, max speed, turning rate)
+• Speed at time of event (km/h or mph)
+• Seatbelt state at event time (on/off)
+• Ignition state at event time
+• Event/telemetry source record ID","What do we get for Asset_id? The event messages seem to include ""asset_id"" only, not type or class.
+
+Need to confirm if seatbelt state is available and in which event/topic.
+
+Need to confirm if event severity metrics are available.","GSE name is what we display, Asset_ID is what we want, can be same as GSE name. 
+
+Seat belt state does not come through today in any event based message. One customer asked 2 weeks ago so they will add it. State of When was engaged and state of when sit on seat. For sure will happen in 2026.
+
+Event is yes/no, no severity detail."
+"1.2 – Safety events by Event Type (by station, ranked)","• Station code/name
+• Event type (as above)
+• Event timestamp
+• Asset ID and Asset Type
+• Employee ID (operator at event time)
+• Event severity metrics
+• GPS location
+• Ignition state / speed at event time",,
+"1.3 – # and type of safety events by GSE Asset Type (by station, ranked)","• Station code/name
+• Asset Type
+• Asset ID
+• Event type
+• Event timestamp
+• Employee ID (operator)
+• Event severity metrics
+• Operating context (speed, ignition)","What employee ID will we get in the message?
+
+",Employee_ID is usually differentTBD We put the employee ID. AC123456. Maybe we want email address. You can put letters but probably can't put a whole email address. It doesn't block as employee ID but Adveez needs to verify.
+"1.4 – Attempts by unqualified drivers to start assets (by station, by employee, incl. asset type)","• Station code/name
+• Employee ID and qualifications held (e.g., Baseline, CLS/CLW, LTL/LCL/WTL, ASL/ASM)
+• Required qualification for asset / asset type
+• Asset ID and Asset Type
+• Attempt timestamp
+• Attempt outcome (blocked/allowed)
+• Reason code (e.g., access control not active, shunted, insufficient qualification)
+• Access control device ID (badge/FOB/terminal)
+• Authentication result / error message","With regards to asset type/class, what is in the message? Do we have to make our own conversion table to figure this out?
+
+What will we get for reason?","Brand, model, year, station, these can be pushed in the event based message yes.
+
+Event will have who tried it, which gse, where it was, time stamp. If we have it in the system, we will have the name (eg. Swissport tries to start it)."
+1.5 – Daily Inspection Compliance (motorized assets),"• Station code/name
+• Asset master list (Asset ID, Asset Type, Motorized flag, in-service status)
+• Inspection schedule (daily) per asset
+• Inspection completion record (timestamp, inspector ID, pass/fail)
+• Missed inspection indicator per asset/day
+• Out-of-service status and effective dates (to exclude)",Do we get an event for each inspection completed?,There is an event when inspection is completed and an event when the checklist fails and which qusetion failed.
+2.1 – GSE Asset Utilization Rate (monthly),"• Asset ID and Asset Type
+• Station code/name
+• State timeline with timestamps (e.g., In use, Is moving, Is working, Idle, Ignition on)
+• Time bucket/calendar (date, week, month)
+• Operating hours meter (if available)",TEST CAN REPORT OPTION,
+2.2 – GSE Asset Availability Rate (live data; weekly reporting),"• Asset ID and Asset Type
+• Station code/name
+• State timeline with timestamps (Available/Serviceable vs In maintenance/Repair Requested/Is Halted/Restricted)
+• Charging state and SoC (to decide if considered available)
+• Start/end times of unavailability windows
+• Calendar period for aggregation","TEST CAN REPORT OPTION
+
+- EV charging discounted, charge < 10% discounted?
+
+If unit is CHARGING, can we tell?  Averist API data?? Or just Geofence?","Charging: The vehicle is in the loading area.
+Complementary status
+Restricted: This is linked to OSHA Checklist. When a person is answering engine on questions, or has knowingly decided not to answer them. The vehicle is in use restricted (it emits a sound and is in turtle mode)
+Low battery: energy level (diesel or electric) on GSE is under 40% (when fuel level or State of Charge is configured) 
+Charging: The equipment is being charged
+Charged: The equipment is charged
+
+"
+2.3 – Downtime per Asset Type (by station; motorized),"• Asset Type and Asset ID
+• Station code/name
+• Failure or out-of-service start timestamp
+• Return-to-service timestamp
+• Downtime reason codes (corrective, PMI, parts wait, etc.)
+• Work order/maintenance ticket ID (if available)
+- Charging","Do we have In Maintenance, Charging, Low battery all coming in a single message?",No
+2.4 – Mean Time To Repair (MTTR) by Asset Type (by station; motorized),"• Asset Type and Asset ID
+• Station code/name
+• Failure reported timestamp
+• Repair start timestamp
+• Repair completed timestamp
+• Work order/maintenance ticket ID
+• Failure category/severity","Do we get an event when a unit leaves Maintenance Geofence area?
+
+If so, we can deduce anything that is in maintenance for more than X hours has had a real maintenance and when it leaves, that it's total time in maintenance (and discard anything that leaves in under an hour or so).","Yes, based on the geofence."
+2.5 – Mean Time Between Failures (MTBF) by Asset Type (by station; motorized),"• Asset Type and Asset ID
+• Station code/name
+• Sequence of failure event timestamps per asset
+• Operating time between failures (from hour meter or state timeline)
+• Failure definitions (what constitutes a failure)","*if we had an API with M5, what would be useful, what do other customers import from Fleet maintenance? All recent jobs/job notes?","Next maintenance date, Needs service now (if WO opened for that unit), and can lock the unit to only GSE users."
+2.6 – Maintenance Event Frequency by Asset Type (by station; ranked),"• Asset Type and Asset ID
+• Station code/name
+• Maintenance event logs (timestamp, type: PMI/corrective)
+• Event severity/priority
+• Work order IDs",Do some customers manually update Localeez with maintenance logs?,n/a
+2.7 – Critical faults by Asset (all) (by station; ranked),"• Asset ID and Asset Type
+• Station code/name
+• Fault events (timestamp, fault code, severity)
+• Operating context (state, speed/ignition)
+• Event source (ECU/telematics)","What faults are we actually getting from your system?
+Eg. Coolant temperature, oil pressure, other?",Basically those 2 and they are configurable. 
+2.8 – EV Battery SoC < 30% events (by station; ranked by occurrences),"• Asset ID and Asset Type (EV only)
+• Station code/name
+• Timestamp of SoC crossing below threshold
+• State of Charge (%)
+• Charger connection state at event time
+• Operator (Employee ID) at event time
+• Location (GPS)
+• Alert/notification ID (if sent by system)",Do these create events and are they linked to operator ID?,"yes, they could add the driver, usually linked to the GSE. "
+3.1 – MQTT broker connection uptime (%) (monthly),"• Heartbeat/health check timestamps (up/down)
+• Broker instance ID / region
+• Planned maintenance windows (to exclude)
+• Total time in period",I believe we can get this on our end post setup.,
+3.2 – API success rate between AC and vendor (%),"• API request logs (timestamp, endpoint, method)
+• Correlation/request ID
+• Response status code
+• Success/failure flag
+• Latency (ms)
+• Error category/message for failures",I believe we can get this on our end post setup.,
+3.3 – Data latency (event occurrence → ingestion),"• Event occurrence timestamp (device/source)
+• Ingestion timestamp (vendor → AC)
+• Event/message ID to correlate
+• Data path (MQTT/API/batch)",I believe we can get this on our end post setup.,
+3.4 – Message rejection rate (%),"• Count of messages received
+• Count of messages rejected
+• Rejection reasons/categories
+• Time period
+• Source system/topic/asset IDs",I believe we can get this on our end post setup.,
+"4.1 – Fleet Optimization Index (composite of Availability, Utilization, Redundancy)","• Availability % by station/asset type
+• Utilization % by station/asset type
+• Redundancy metric (e.g., spare ratio = assets available vs required demand)
+• Asset counts by station/type
+• Demand baseline (e.g., flight turns/peaks) for redundancy calculation
+• Weighting scheme (if components are weighted in the composite)",TBD.,
+5.1 - Fleet that hasn’t moved in >48hours,"(GSE messages)
+Timemeter
+assetID
+timestamp
+Location (latitude / longitude)",,The goal of this report is to present a list of GSE motorized assets which haven't moved in 48 hours and their last known location.
+,,,
+,,,
+Safety Event Types,Harsh Acceleration; Harsh Brake; Harsh Jump; Harsh Turn; Overspeed; Shock (impact); Seatbelt,,
+Qualifications,Baseline; CLS/CLW; LTL/LCL/WTL; ASL/ASM,,
+Asset Types (examples),Belt Loader; Cargo Loader; Bag Tractor; Pushback; Forklift; Others TBC,,
+Equipment States,In use; Is moving; Idle; Ignition on; Allocated; Is working; In maintenance; Is Halted; Charging; Restricted; Low battery; Charged; Access Control not active or shunted; Repair Requested,,
+,,,
+,,,

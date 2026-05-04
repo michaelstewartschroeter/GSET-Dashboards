@@ -1,0 +1,18 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"refuelling",
+      "latitude":38.952278,
+      "longitude":-77.4452,
+      "happened_at":"2023-08-09T15:12:18.674Z",
+      "driver_id":null,
+      "duration":0,
+      "details":{
+         "id":2284721,
+         "value":59
+      }
+   }
+}

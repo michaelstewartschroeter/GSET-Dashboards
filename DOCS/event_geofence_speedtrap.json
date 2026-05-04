@@ -1,0 +1,20 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"geofence",
+      "latitude":29.990256,
+      "longitude":-95.34218,
+      "happened_at":"2023-08-09T14:53:42.000Z",
+      "driver_id":null,
+      "duration":0,
+      "details":{
+         "id":15269487,
+         "type":"speed_trap",
+         "zone_id":3147,
+         "speed":20
+      }
+   }
+}

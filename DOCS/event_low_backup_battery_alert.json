@@ -1,0 +1,18 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"low_backup_battery_alert",
+      "latitude":37.620717,
+      "longitude":-122.386455,
+      "happened_at":"2023-08-09T10:41:11.000Z",
+      "driver_id":null,
+      "duration":0,
+      "details":{
+         "id":565916,
+         "value":10
+      }
+   }
+}

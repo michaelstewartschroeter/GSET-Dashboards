@@ -1,0 +1,19 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"unauthorized_driver",
+      "latitude":41.976628,
+      "longitude":-87.910541,
+      "happened_at":"2023-07-23T18:45:08.000Z",
+      "driver_id":null,
+      "duration":0,
+      "details":{
+         "id":1003513,
+         "tag_uid":"2147483647",
+         "reason":0
+      }
+   }
+}

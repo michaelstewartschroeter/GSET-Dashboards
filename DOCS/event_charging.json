@@ -1,0 +1,28 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"charging",
+      "latitude":41.979061,
+      "longitude":-87.907056,
+      "happened_at":"2023-08-09T15:05:56.000Z",
+      "driver_id":null,
+      "duration":0,
+      "details":{
+         "id":433731,
+         "timemeter":5993448,
+         "mileage":8970220,
+         "battery_level_before_charging":null,
+         "zone_id":4015,
+         "gradient_boosting_result":null,
+         "lasso_regressor_result":null,
+         "lasso_regressor_2_result":null,
+         "linear_regressor_result":null,
+         "random_forest_result":null,
+         "unplug_date":null,
+         "battery_level_after_charging":null
+      }
+   }
+}

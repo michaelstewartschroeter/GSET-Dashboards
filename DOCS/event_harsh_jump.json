@@ -1,0 +1,19 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"harsh_jump",
+      "latitude":41.978046,
+      "longitude":-87.91025,
+      "happened_at":"2023-08-09T14:35:51.000Z",
+      "driver_id":null,
+      "duration":0,
+      "details":{
+         "id":95176466,
+         "speed":null,
+         "threshold":82
+      }
+   }
+}

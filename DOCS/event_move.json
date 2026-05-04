@@ -1,0 +1,20 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"move",
+      "latitude":37.634479,
+      "longitude":-122.39313,
+      "happened_at":"2023-08-09T14:44:15.000Z",
+      "driver_id":null,
+      "duration":58,
+      "details":{
+         "id":4308232,
+         "latitude_end":37.63457,
+         "longitude_end":-122.392873,
+         "distance_km":0.0716678
+      }
+   }
+}

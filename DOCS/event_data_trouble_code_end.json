@@ -1,0 +1,36 @@
+{
+   "channel":"event",
+   "event":"event:created",
+   "asset_id":"12345",
+   "name":"MyGSE",
+   "data":{
+      "event_details_type":"data_trouble_code_end",
+      "latitude":40.695853,
+      "longitude":-74.177004,
+      "happened_at":"2023-08-09T14:44:02.000Z",
+      "driver_id":431,
+      "duration":0,
+      "details":{
+         "id":171554923,
+         "dtc":"Z000F"
+      }
+   }
+}
+
+Code value:
+- "Z0001": Potential wiring issue with GPS antenna
+- "Z0002": Potential wiring issue with main CAN bus
+- "Z0003": Potential wiring issue with auxiliary CAN bus
+- "Z0004": Potential wiring issue with RS232 bus
+- "Z0005": Potential wiring issue with analog 1 input
+- "Z0006": Potential wiring issue with analog 2 input
+- "Z0007": Potential wiring issue with analog 3 input
+- "Z0008": Potential wiring issue with driver's seatbelt
+- "Z0009": Potential wiring issue with passenger's seatbelt
+- "Z000A": Potential wiring issue with driver's seatswitch
+- "Z000B": Potential wiring issue with passenger's seatswitch
+- "Z000C": Potential wiring issue with contact/pedal input
+- "Z000D": Potential wiring issue with working input
+- "Z000E": Potential wiring issue with timemeter input
+- "Z000F": Potential wiring issue with Turtle mode
+- "Z1001": Potential wiring issue with GSM/LTE antenna
