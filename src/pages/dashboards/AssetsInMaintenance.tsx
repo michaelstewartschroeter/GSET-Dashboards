@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { useFilters } from '../../contexts/FilterContext';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Wrench, AlertCircle, TrendingDown } from 'lucide-react';
 import { isWithinInterval, subHours } from 'date-fns';
 
@@ -208,7 +208,7 @@ const AssetsInMaintenance: React.FC = () => {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {pieData.map((entry, index) => (
+                {pieData.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

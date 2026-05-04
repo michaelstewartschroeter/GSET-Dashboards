@@ -10,7 +10,7 @@ export interface GSEEvent {
     latitude: number;
     longitude: number;
     happened_at: string;
-    driver_id: number | null;
+    driver_id: string | null;
     duration: number;
     details?: Record<string, any>;
   };

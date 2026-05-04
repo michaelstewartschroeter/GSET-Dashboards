@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { useFilters } from '../../contexts/FilterContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { AlertTriangle, TrendingUp, Layers } from 'lucide-react';
+import { AlertTriangle, Layers } from 'lucide-react';
 import { SAFETY_EVENT_TYPES } from '../../types';
 import { isWithinInterval } from 'date-fns';
 

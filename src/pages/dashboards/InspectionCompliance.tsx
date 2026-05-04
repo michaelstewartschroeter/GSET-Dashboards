@@ -3,7 +3,7 @@ import { useWebSocket } from '../../contexts/WebSocketContext';
 import { useFilters } from '../../contexts/FilterContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { ClipboardCheck, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
-import { isWithinInterval, format, eachDayOfInterval, startOfDay } from 'date-fns';
+import { isWithinInterval, format, eachDayOfInterval } from 'date-fns';
 
 const InspectionCompliance: React.FC = () => {
   const { events } = useWebSocket();
@@ -163,7 +163,6 @@ const InspectionCompliance: React.FC = () => {
   const noncompliantCount = inspectionData.filter(i => !i.compliant).length;
   const complianceRate = totalInspections > 0 ? ((compliantCount / totalInspections) * 100).toFixed(1) : '0';
   const bestStation = complianceByStation[0];
-  const worstStation = complianceByStation[complianceByStation.length - 1];
 
   const pieData = [
     { name: 'Compliant', value: compliantCount },
@@ -242,7 +241,7 @@ const InspectionCompliance: React.FC = () => {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {pieData.map((entry, index) => (
+                {pieData.map((_entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>

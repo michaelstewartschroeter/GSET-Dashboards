@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { GSEEvent } from '../types';
+import { generateHistoricalEvents, generateLiveEvent } from '../utils/eventGenerator';
 
 interface WebSocketContextType {
   events: GSEEvent[];
@@ -9,34 +10,18 @@ interface WebSocketContextType {
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
 export const WebSocketProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [events, setEvents] = useState<GSEEvent[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const [events, setEvents] = useState<GSEEvent[]>(() => generateHistoricalEvents(2000, 14));
+  const [isConnected] = useState(true);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8080');
-
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      setIsConnected(true);
-    };
-
-    ws.onmessage = (message) => {
-      const event = JSON.parse(message.data) as GSEEvent;
-      setEvents((prev) => [event, ...prev].slice(0, 1000)); // Keep last 1000 events
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setIsConnected(false);
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      setIsConnected(false);
-    };
+    // Simulate live events arriving every 3 seconds
+    const interval = setInterval(() => {
+      const newEvent = generateLiveEvent();
+      setEvents((prev) => [newEvent, ...prev].slice(0, 3000));
+    }, 3000);
 
     return () => {
-      ws.close();
+      clearInterval(interval);
     };
   }, []);
 

@@ -3,7 +3,7 @@ import { useWebSocket } from '../../contexts/WebSocketContext';
 import { useFilters } from '../../contexts/FilterContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Clock, AlertCircle, TrendingUp } from 'lucide-react';
-import { isWithinInterval, differenceInHours } from 'date-fns';
+import { isWithinInterval } from 'date-fns';
 
 const Downtime: React.FC = () => {
   const { events } = useWebSocket();

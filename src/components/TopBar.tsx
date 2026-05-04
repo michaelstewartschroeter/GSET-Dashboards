@@ -14,7 +14,7 @@ interface TopBarProps {
 }
 
 const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, sidebarOpen }) => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { isConnected } = useWebSocket();
   const {
     selectedStations,

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { useFilters } from '../../contexts/FilterContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { AlertTriangle, Activity, MapPin } from 'lucide-react';
 import { SAFETY_EVENT_TYPES } from '../../types';
 import { isWithinInterval, format } from 'date-fns';
