@@ -4,6 +4,7 @@ import SafetyByEmployee from './dashboards/SafetyByEmployee';
 import SafetyByEventType from './dashboards/SafetyByEventType';
 import SafetyByAssetType from './dashboards/SafetyByAssetType';
 import UnauthorizedAccess from './dashboards/UnauthorizedAccess';
+import UnqualifiedAccess from './dashboards/UnqualifiedAccess';
 import InspectionCompliance from './dashboards/InspectionCompliance';
 import UtilizationRate from './dashboards/UtilizationRate';
 import Availability from './dashboards/Availability';
@@ -23,7 +24,8 @@ const Dashboard: React.FC = () => {
         <Route path="/safety/by-event-type" element={<SafetyByEventType />} />
         <Route path="/safety/by-asset-type" element={<SafetyByAssetType />} />
         <Route path="/safety/unauthorized" element={<UnauthorizedAccess />} />
-        <Route path="/safety/inspection" element={<InspectionCompliance />} />
+        <Route path="/safety/unqualified"  element={<UnqualifiedAccess />} />
+        <Route path="/safety/inspection"   element={<InspectionCompliance />} />
         
         {/* Fleet Operations Dashboards */}
         <Route path="/fleet/utilization" element={<UtilizationRate />} />

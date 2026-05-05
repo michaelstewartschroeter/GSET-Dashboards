@@ -45,6 +45,7 @@ const SAFETY_EVENT_TYPES = [
   'shock',
   'safety_alert',
   'unauthorized_driver',
+  'unqualified_driver',
 ];
 
 const OTHER_EVENT_TYPES = [
@@ -57,6 +58,7 @@ const OTHER_EVENT_TYPES = [
   'data_trouble_code_start',
   'e_stop',
   'low_backup_battery_alert',
+  'unauthorized_use',
 ];
 
 const EMPLOYEE_IDS = [
@@ -65,6 +67,28 @@ const EMPLOYEE_IDS = [
 ];
 
 const TROUBLE_CODES = ['Z000F', 'Z0001', 'Z0002', 'Z0003', 'Z0004'];
+
+// Qualifications an employee can hold (from the certification matrix)
+const QUALIFICATIONS = [
+  'ASU',
+  'Belt Loader',
+  'Cargo Tractor',
+  'GPU',
+  'Lower Deck Loader',
+  'Main Deck Loader',
+  'Pushback',
+];
+
+// Asset types that map to a required qualification
+const QUALIFIED_ASSET_TYPES = ['Belt Loader', 'Cargo Loader', 'Bag Tractor', 'GPU', 'Pushback'];
+
+const ASSET_REQUIRED_QUALIFICATION: Record<string, string | string[]> = {
+  'Belt Loader':  'Belt Loader',
+  'Cargo Loader': ['Lower Deck Loader', 'Main Deck Loader'],
+  'Bag Tractor':  'Cargo Tractor',
+  'GPU':          'GPU',
+  'Pushback':     'Pushback',
+};
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -95,21 +119,24 @@ function getBranch(assetType: string, assetId: string): string {
 // ─── Single-event generator ─────────────────────────────────────────────────
 
 function makeEvent(happenedAt: Date): GSEEvent {
-  const isSafety = Math.random() < 0.3;
-  const station  = pick(STATIONS);
-  const assetType = pick(ASSET_TYPES);
-  const assetNum  = randInt(1, 999).toString().padStart(3, '0');
-  const assetId   = `${station.code}-${assetType.replace(/\s+/g, '')}-${assetNum}`;
-  const model     = pick(ASSET_MODELS[assetType]);
-  const branch    = getBranch(assetType, assetId);
-  const lat       = station.lat + rand(-0.01, 0.01);
-  const lng       = station.lng + rand(-0.01, 0.01);
-
+  const isSafety  = Math.random() < 0.3;
+  const station   = pick(STATIONS);
   const eventType = isSafety ? pick(SAFETY_EVENT_TYPES) : pick(OTHER_EVENT_TYPES);
+
+  // unqualified_driver events are restricted to asset types with a defined qualification
+  const assetType = eventType === 'unqualified_driver'
+    ? pick(QUALIFIED_ASSET_TYPES)
+    : pick(ASSET_TYPES);
+
+  const assetNum = randInt(1, 999).toString().padStart(3, '0');
+  const assetId  = `${station.code}-${assetType.replace(/\s+/g, '')}-${assetNum}`;
+  const model    = pick(ASSET_MODELS[assetType]);
+  const branch   = getBranch(assetType, assetId);
+  const lat      = station.lat + rand(-0.01, 0.01);
+  const lng      = station.lng + rand(-0.01, 0.01);
 
   const details: Record<string, unknown> = { id: randInt(1, 100_000_000) };
 
-  // Event-type-specific details
   if (['harsh_acceleration', 'harsh_brake', 'harsh_turn', 'harsh_jump'].includes(eventType)) {
     details.speed     = randInt(10, 50);
     details.threshold = randInt(30, 90);
@@ -128,10 +155,26 @@ function makeEvent(happenedAt: Date): GSEEvent {
   } else if (eventType === 'charging') {
     details.battery_level_before_charging = randInt(10, 40);
     details.battery_level_after_charging  = null;
+  } else if (eventType === 'unqualified_driver') {
+    const reqQuals = ASSET_REQUIRED_QUALIFICATION[assetType];
+    const required = Array.isArray(reqQuals) ? pick(reqQuals) : reqQuals;
+    const others   = QUALIFICATIONS.filter(q => q !== required).sort(() => Math.random() - 0.5);
+    details.required_qualification   = required;
+    details.employee_qualifications  = others.slice(0, randInt(1, 4)).join(', ') || 'None';
   }
 
-  const isLong = ['idle', 'working', 'busy'].includes(eventType);
+  const isLong   = ['idle', 'working', 'busy'].includes(eventType);
   const duration = isLong ? randInt(60, 3600) : randInt(5, 300);
+
+  // unauthorized_use: no driver known; safety events: always a driver; other: 70% chance
+  let driver_id: string | null;
+  if (eventType === 'unauthorized_use') {
+    driver_id = null;
+  } else if (isSafety) {
+    driver_id = pick(EMPLOYEE_IDS);
+  } else {
+    driver_id = Math.random() > 0.3 ? pick(EMPLOYEE_IDS) : null;
+  }
 
   return {
     channel: 'event',
@@ -145,7 +188,7 @@ function makeEvent(happenedAt: Date): GSEEvent {
       latitude:  lat,
       longitude: lng,
       happened_at: happenedAt.toISOString(),
-      driver_id: !isSafety && Math.random() > 0.3 ? pick(EMPLOYEE_IDS) : pick(EMPLOYEE_IDS),
+      driver_id,
       duration,
       details,
     },

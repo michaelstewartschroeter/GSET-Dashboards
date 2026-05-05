@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useWebSocket } from '../../contexts/WebSocketContext';
 import { useFilters } from '../../contexts/FilterContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { ShieldAlert, AlertTriangle, Users, MapPin } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, MapPin } from 'lucide-react';
 import { isWithinInterval, format, eachDayOfInterval } from 'date-fns';
 import MapModal from '../../components/MapModal';
 
@@ -17,13 +17,13 @@ const UnauthorizedAccess: React.FC = () => {
     description: '',
   });
 
-  const openMap = (lat: number, lng: number, assetId: string, driverId: string) => {
+  const openMap = (lat: number, lng: number, assetId: string, assetType: string) => {
     setMapState({
       isOpen: true,
       lat,
       lng,
-      title: 'Unauthorized Access Attempt',
-      description: `Asset: ${assetId} | Unqualified Driver: ${driverId}`,
+      title: 'Unauthorized Use Detected',
+      description: `Asset: ${assetId} | Type: ${assetType} | Driver: Unknown`,
     });
   };
 
@@ -33,8 +33,8 @@ const UnauthorizedAccess: React.FC = () => {
 
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      // Filter unauthorized_driver events
-      if (event.data.event_details_type !== 'unauthorized_driver') {
+      // Filter unauthorized_use events (no access control — driver unknown)
+      if (event.data.event_details_type !== 'unauthorized_use') {
         return false;
       }
 
@@ -106,65 +106,32 @@ const UnauthorizedAccess: React.FC = () => {
 
       return {
         date: dayStr,
-        attempts: dayEvents.length,
+        incidents: dayEvents.length,
       };
     });
   }, [filteredEvents, dateRange]);
 
-  // Repeat offenders
-  const repeatOffenders = useMemo(() => {
-    const driverMap = new Map<string, { count: number; assets: Set<string> }>();
-
-    filteredEvents.forEach((event) => {
-      const driverId = event.data.driver_id || 'Unknown';
-      if (!driverMap.has(driverId)) {
-        driverMap.set(driverId, { count: 0, assets: new Set() });
-      }
-      const data = driverMap.get(driverId)!;
-      data.count++;
-      data.assets.add(event.name);
-    });
-
-    return Array.from(driverMap.entries())
-      .map(([driver, data]) => ({
-        driver,
-        attempts: data.count,
-        assetTypes: data.assets.size,
-      }))
-      .sort((a, b) => b.attempts - a.attempts)
-      .slice(0, 10);
-  }, [filteredEvents]);
-
-  const totalAttempts = filteredEvents.length;
-  const uniqueDrivers = new Set(filteredEvents.map(e => e.data.driver_id)).size;
+  const totalIncidents = filteredEvents.length;
   const worstStation = attemptsByStation[0];
+  const worstAssetType = attemptsByAssetType[0];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Unauthorized Access Attempts</h1>
-        <p className="text-gray-400">Tracking attempts by unqualified drivers to access GSE assets</p>
+        <h1 className="text-2xl font-bold text-white mb-2">Unauthorized Use — Access Control Bypass</h1>
+        <p className="text-gray-400">GSE operated without using the access control system — employee identity unknown</p>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-dark-card border border-dark-border rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-400 text-sm">Total Unauthorized Attempts</span>
+            <span className="text-gray-400 text-sm">Total Incidents</span>
             <ShieldAlert className="w-5 h-5 text-red-500" />
           </div>
-          <div className="text-3xl font-bold text-white">{totalAttempts}</div>
-          <div className="text-gray-400 text-sm mt-2">Last 14 days</div>
-        </div>
-
-        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-gray-400 text-sm">Unique Unqualified Drivers</span>
-            <Users className="w-5 h-5 text-orange-500" />
-          </div>
-          <div className="text-3xl font-bold text-white">{uniqueDrivers}</div>
-          <div className="text-gray-400 text-sm mt-2">Attempting access</div>
+          <div className="text-3xl font-bold text-white">{totalIncidents}</div>
+          <div className="text-gray-400 text-sm mt-2">No employee identified</div>
         </div>
 
         <div className="bg-dark-card border border-dark-border rounded-lg p-6">
@@ -173,15 +140,24 @@ const UnauthorizedAccess: React.FC = () => {
             <AlertTriangle className="w-5 h-5 text-yellow-500" />
           </div>
           <div className="text-2xl font-bold text-white">{worstStation?.station || 'N/A'}</div>
-          <div className="text-gray-400 text-sm mt-2">{worstStation?.count || 0} attempts</div>
+          <div className="text-gray-400 text-sm mt-2">{worstStation?.count || 0} incidents</div>
+        </div>
+
+        <div className="bg-dark-card border border-dark-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-400 text-sm">Most Affected Asset Type</span>
+            <AlertTriangle className="w-5 h-5 text-orange-500" />
+          </div>
+          <div className="text-xl font-bold text-white">{worstAssetType?.type || 'N/A'}</div>
+          <div className="text-gray-400 text-sm mt-2">{worstAssetType?.count || 0} incidents</div>
         </div>
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Attempts Over Time */}
+        {/* Incidents Over Time */}
         <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Unauthorized Attempts Trend</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">Incidents Over Time</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={attemptsOverTime}>
               <CartesianGrid strokeDasharray="3 3" stroke="#30363D" />
@@ -194,14 +170,14 @@ const UnauthorizedAccess: React.FC = () => {
                   borderRadius: '8px',
                 }}
               />
-              <Line type="monotone" dataKey="attempts" stroke="#EF4444" strokeWidth={2} />
+              <Line type="monotone" dataKey="incidents" stroke="#EF4444" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Attempts by Station */}
+        {/* Incidents by Station */}
         <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Attempts by Station</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">Incidents by Station</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={attemptsByStation}>
               <CartesianGrid strokeDasharray="3 3" stroke="#30363D" />
@@ -220,87 +196,35 @@ const UnauthorizedAccess: React.FC = () => {
         </div>
       </div>
 
-      {/* Tables Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Repeat Offenders */}
-        <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-dark-border">
-            <h2 className="text-lg font-semibold text-white">Repeat Offenders</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-dark-hover">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Driver ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Attempts
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Asset Types
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-dark-border">
-                {repeatOffenders.map((offender) => (
-                  <tr key={offender.driver} className="hover:bg-dark-hover transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-white">{offender.driver}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/20 text-red-400">
-                        {offender.attempts}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                      {offender.assetTypes}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Incidents by Asset Type */}
+      <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-dark-border">
+          <h2 className="text-lg font-semibold text-white">Incidents by Asset Type</h2>
         </div>
-
-        {/* Attempts by Asset Type */}
-        <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-dark-border">
-            <h2 className="text-lg font-semibold text-white">Attempts by Asset Type</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-dark-hover">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Asset Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Attempts
-                  </th>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-dark-hover">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Asset Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Incidents</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-dark-border">
+              {attemptsByAssetType.map((item) => (
+                <tr key={item.type} className="hover:bg-dark-hover transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{item.type}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-semibold">{item.count}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-dark-border">
-                {attemptsByAssetType.map((item) => (
-                  <tr key={item.type} className="hover:bg-dark-hover transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-white">{item.type}</span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-white font-semibold">{item.count}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Recent Unauthorized Attempts */}
+      {/* Recent Incidents */}
       <div className="bg-dark-card border border-dark-border rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-dark-border flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Recent Unauthorized Attempts</h2>
+          <h2 className="text-lg font-semibold text-white">Recent Incidents</h2>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             <span className="text-sm text-gray-400">Live</span>
@@ -313,18 +237,15 @@ const UnauthorizedAccess: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-900/20 text-red-400 border border-red-500/30">
-                      UNAUTHORIZED ACCESS
+                      UNAUTHORIZED USE
                     </span>
                     <span className="text-xs text-gray-500">
                       {format(new Date(event.data.happened_at), 'MMM d, HH:mm:ss')}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex flex-wrap items-center gap-4 text-sm">
                     <span className="text-gray-300">
-                      <span className="text-gray-500">Driver:</span> {event.data.driver_id || 'Unknown'}
-                    </span>
-                    <span className="text-gray-300">
-                      <span className="text-gray-500">Asset:</span> {event.asset_id}
+                      <span className="text-gray-500">Asset ID:</span> {event.asset_id}
                     </span>
                     <span className="text-gray-300">
                       <span className="text-gray-500">Type:</span> {event.name}
@@ -332,13 +253,9 @@ const UnauthorizedAccess: React.FC = () => {
                     <span className="text-gray-300">
                       <span className="text-gray-500">Branch:</span> {event.branch || 'N/A'}
                     </span>
+                    <span className="text-red-400 text-xs font-medium">Driver: Unknown</span>
                     <button
-                      onClick={() => openMap(
-                        event.data.latitude,
-                        event.data.longitude,
-                        event.asset_id,
-                        event.data.driver_id?.toString() || 'Unknown'
-                      )}
+                      onClick={() => openMap(event.data.latitude, event.data.longitude, event.asset_id, event.name)}
                       className="text-primary-cyan hover:text-primary-cyan/80 flex items-center gap-1 transition-colors cursor-pointer"
                     >
                       <MapPin className="w-3 h-3" />

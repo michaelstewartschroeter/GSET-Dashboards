@@ -11,6 +11,7 @@ import {
   Wrench,
   AlertCircle,
   Battery,
+  GraduationCap,
 } from 'lucide-react';
 import bagTractorLogo from '../../BagTractor.svg';
 
@@ -27,7 +28,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         { path: '/safety/by-event-type', label: 'By Event Type', icon: AlertTriangle },
         { path: '/safety/by-asset-type', label: 'By Asset Type', icon: TrendingUp },
         { path: '/safety/unauthorized', label: 'Unauthorized Access', icon: Shield },
-        { path: '/safety/inspection', label: 'Inspection Compliance', icon: CheckSquare },
+        { path: '/safety/unqualified',  label: 'Unqualified Access',  icon: GraduationCap },
+        { path: '/safety/inspection',   label: 'Inspection Compliance', icon: CheckSquare },
       ],
     },
     {
