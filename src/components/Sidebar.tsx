@@ -7,7 +7,6 @@ import {
   Shield,
   CheckSquare,
   BarChart3,
-  Clock,
   Wrench,
   AlertCircle,
   Battery,
@@ -37,7 +36,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       items: [
         { path: '/fleet/utilization', label: 'Utilization Rate', icon: BarChart3 },
         { path: '/fleet/availability', label: 'Availability', icon: Activity },
-        { path: '/fleet/downtime', label: 'Downtime', icon: Clock },
         { path: '/fleet/in-maintenance', label: 'In Maintenance', icon: Wrench },
         { path: '/fleet/faults', label: 'Critical Faults', icon: AlertCircle },
         { path: '/fleet/battery', label: 'EV Battery Alerts', icon: Battery },
