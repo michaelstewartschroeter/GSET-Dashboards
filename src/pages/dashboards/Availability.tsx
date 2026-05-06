@@ -3,7 +3,7 @@ import { useWebSocket } from '../../contexts/WebSocketContext';
 import { useFilters } from '../../contexts/FilterContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from 'recharts';
 import { Activity, CheckCircle, XCircle } from 'lucide-react';
-import { isWithinInterval, format, eachDayOfInterval } from 'date-fns';
+import { isWithinInterval, format, eachDayOfInterval, addMinutes, isSameDay } from 'date-fns';
 
 // ─── State buckets ──────────────────────────────────────────────────────────
 // Available  : idle, use, move  (parked/ready or in transit, accessible)
@@ -106,6 +106,40 @@ const Availability: React.FC = () => {
     });
   }, [filteredEvents, dateRange]);
 
+  // ── 15-minute buckets (used when dateRange spans a single day) ─────────────
+  const isSingleDay = isSameDay(dateRange.start, dateRange.end);
+
+  const overTime15min = useMemo(() => {
+    if (!isSingleDay) return [];
+    const slots: { date: string; Available: number; Allocated: number; Charging: number; Maintenance: number }[] = [];
+    let cursor = new Date(dateRange.start);
+    const rangeEnd = new Date(dateRange.end);
+    while (cursor <= rangeEnd) {
+      const slotStart = new Date(cursor);
+      const slotEnd   = addMinutes(cursor, 15);
+      const label     = format(slotStart, 'HH:mm');
+      const slotEvents = filteredEvents.filter((e) => {
+        const t = new Date(e.data.happened_at);
+        return t >= slotStart && t < slotEnd;
+      });
+      const dur = { available: 0, allocated: 0, charging: 0, maintenance: 0 };
+      slotEvents.forEach((e) => {
+        const s = getState(e.data.event_details_type);
+        if (s) dur[s] += e.data.duration;
+      });
+      const total = dur.available + dur.allocated + dur.charging + dur.maintenance || 1;
+      slots.push({
+        date: label,
+        Available:    parseFloat(((dur.available   / total) * 100).toFixed(1)),
+        Allocated:    parseFloat(((dur.allocated   / total) * 100).toFixed(1)),
+        Charging:     parseFloat(((dur.charging    / total) * 100).toFixed(1)),
+        Maintenance:  parseFloat(((dur.maintenance / total) * 100).toFixed(1)),
+      });
+      cursor = slotEnd;
+    }
+    return slots;
+  }, [filteredEvents, dateRange, isSingleDay]);
+
   // ── KPIs ───────────────────────────────────────────────────────────────────
   const fleetAvailability = useMemo(() => {
     if (!byAssetType.length) return 0;
@@ -181,13 +215,27 @@ const Availability: React.FC = () => {
         ))}
       </div>
 
-      {/* Stacked area — daily trend */}
+      {/* Stacked area — daily trend or 15-min when on today */}
       <div className="bg-dark-card border border-dark-border rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Fleet State Distribution Over Time</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white">
+            {isSingleDay ? 'Fleet State Distribution — 15-Minute Intervals' : 'Fleet State Distribution Over Time'}
+          </h2>
+          {isSingleDay && (
+            <span className="text-xs text-primary-cyan bg-primary-cyan/10 border border-primary-cyan/30 rounded px-2 py-1">
+              Today · 15-min granularity
+            </span>
+          )}
+        </div>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={overTime}>
+          <AreaChart data={isSingleDay ? overTime15min : overTime}>
             <CartesianGrid strokeDasharray="3 3" stroke="#30363D" />
-            <XAxis dataKey="date" stroke="#8B949E" />
+            <XAxis
+              dataKey="date"
+              stroke="#8B949E"
+              interval={isSingleDay ? 3 : 0}
+              tick={{ fontSize: isSingleDay ? 11 : 12 }}
+            />
             <YAxis stroke="#8B949E" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
             <Tooltip
               formatter={(value: number) => `${value}%`}
