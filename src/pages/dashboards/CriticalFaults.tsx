@@ -215,6 +215,10 @@ const CriticalFaults: React.FC = () => {
                       <span className="text-gray-300">
                         <span className="text-gray-500">Type:</span> {event.name}
                       </span>
+                      <span className="text-gray-300">
+                        <span className="text-gray-500">Employee:</span>{' '}
+                        {event.data.driver_id ? event.data.driver_id : <span className="text-gray-500">Unknown</span>}
+                      </span>
                       <button
                         onClick={() => openMap(event.data.latitude, event.data.longitude, event.asset_id, faultCode)}
                         className="text-primary-cyan hover:text-primary-cyan/80 flex items-center gap-1 transition-colors cursor-pointer"
